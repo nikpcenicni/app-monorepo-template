@@ -1,0 +1,87 @@
+/* Colours: dark by default, light under prefers-color-scheme: light.
+   Match them to the apps' colours once they exist, and keep text at 4.5:1 contrast. */
+:root {
+  --bg: #10131c;
+  --surface: #1b2030;
+  --text: #eef0f6;
+  --muted: #b4bacb;
+  --accent: #8fb3ff;
+  --border: #2e3548;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6f7fb;
+    --surface: #ffffff;
+    --text: #141824;
+    --muted: #4a5163;
+    --accent: #2453c7;
+    --border: #d8dce6;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 1rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+main, footer {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.hero {
+  padding: 4rem 0 2rem;
+  text-align: center;
+}
+
+h1 { font-size: clamp(2.25rem, 8vw, 3.5rem); line-height: 1.1; margin: 0 0 1rem; }
+h2 { font-size: 1.5rem; }
+.lede { color: var(--muted); font-size: 1.15rem; margin: 0 auto 2rem; max-width: 36rem; }
+
+.downloads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.store {
+  display: flex;
+  flex-direction: column;
+  min-width: 10rem;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+}
+.store-name { font-weight: 600; }
+.store-status { color: var(--muted); font-size: 0.875rem; }
+
+/* A store link with an href is live: hide "Coming soon" and make it look clickable. */
+.store[href] .store-status { display: none; }
+.store[href]:hover { border-color: var(--accent); }
+
+a { color: var(--accent); }
+a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+.features ul { padding-left: 1.25rem; }
+
+footer {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  margin-top: 3rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .store { transition: border-color 0.15s ease; }
+}

@@ -1,0 +1,150 @@
+name: TestFlight
+
+# Uploads a build of the iOS app (apps/ios) to TestFlight when its app code changes on main, or when started by hand
+# (Actions tab → TestFlight → Run workflow, also available in the GitHub mobile app).
+# The version is worked out from git by scripts/version.sh (see the branching policy in
+# CLAUDE.md), so nothing is committed back. Each upload is tagged build/<N>.
+#
+# Runs on the self-hosted Mac mini (label __PROJECT_SLUG__-release), which signs with the Apple
+# Distribution certificate in its login keychain and the Apple ID signed in to Xcode.
+# No App Store Connect key is needed. The runner's user must be logged in (turn on
+# automatic login) so the keychain is unlocked.
+#
+# Optional fallback, if uploading with the Xcode Apple ID stops working: an API key with
+# the App Manager role, saved as repo secrets ASC_KEY_ID, ASC_ISSUER_ID and
+# ASC_KEY_P8_BASE64 (base64 -i AuthKey_XXXX.p8 | pbcopy). Signing still uses the local
+# certificate, so the key doesn't need Admin.
+#
+# Every workflow runs on this Mac, but only this one signs and uploads.
+#
+# What to Test: the "## What to Test" sections of the PRs merged since the previous build
+# (scripts/what-to-test.sh) become the build's TestFlight notes. Setting them needs the API
+# key above (apps/ios/scripts/set-testflight-notes.swift). Without it, the notes are only shown in
+# the run summary, ready to paste into App Store Connect.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/ios/__APP_TARGET__/**"
+      - "apps/ios/__APP_TARGET__.xcodeproj/**"
+      - "apps/ios/__APP_TARGET__.entitlements"
+      - "apps/ios/__APP_TARGET__-Info.plist"
+  workflow_dispatch:
+
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  upload:
+    # Uploads only come from main, as the branching policy requires.
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, macOS, __PROJECT_SLUG__-release]
+    # Includes up to 30 minutes waiting for App Store Connect to process the build.
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check signing identity
+        run: |
+          # apps/ios/scripts/_common.sh selects Xcode itself; no sudo needed on the runner.
+          if ! security find-identity -v -p codesigning | grep -q "Apple Distribution: .*(__APPLE_TEAM_ID__)"; then
+            echo "::error::No Apple Distribution certificate for team __APPLE_TEAM_ID__ in this runner's keychain. Sign in to Xcode → Settings → Accounts → Manage Certificates on the runner, or import the certificate."
+            exit 1
+          fi
+
+      - name: Use App Store Connect API key if configured
+        env:
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        run: |
+          if [[ -z "$ASC_KEY_P8_BASE64" || -z "$ASC_KEY_ID" ]]; then
+            echo "No API key secrets; using the Apple ID signed in to Xcode."
+            exit 0
+          fi
+          KEY_PATH="$RUNNER_TEMP/AuthKey_$ASC_KEY_ID.p8"
+          echo "$ASC_KEY_P8_BASE64" | base64 --decode > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          echo "ASC_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+
+      - name: Collect What to Test from merged PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p build
+          scripts/what-to-test.sh > build/whats-new.txt || echo "Bug fixes and improvements." > build/whats-new.txt
+          cat build/whats-new.txt
+
+      - name: Test, archive and upload
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git rev-parse -q --verify "refs/tags/build/$(scripts/version.sh build)" >/dev/null; then
+            echo "Build $(scripts/version.sh) was already uploaded from this commit; nothing to do."
+            exit 0
+          fi
+          apps/ios/scripts/testflight.sh --tag
+
+      - name: Set What to Test in TestFlight
+        id: notes
+        if: success()
+        # The build is already uploaded; failing to set its notes shouldn't fail the run.
+        continue-on-error: true
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          if [[ -z "${ASC_KEY_PATH:-}" ]]; then
+            echo "skipped" > build/whats-new-result.txt
+            echo "::notice::No App Store Connect API key, so What to Test wasn't set. Paste it from the run summary."
+            exit 0
+          fi
+          swift apps/ios/scripts/set-testflight-notes.swift build/whats-new.txt "$(scripts/version.sh marketing)" "$(scripts/version.sh build)"
+          echo "set" > build/whats-new-result.txt
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### TestFlight"
+            if [[ -f apps/ios/build/testflight-result.txt ]]; then cat apps/ios/build/testflight-result.txt; else echo "Upload did not complete."; fi
+            if [[ -f build/whats-new.txt ]]; then
+              echo
+              echo "### What to Test"
+              case "$(cat build/whats-new-result.txt 2>/dev/null)" in
+                set) echo "Set on the build in TestFlight." ;;
+                skipped) echo "Not set: add the ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_P8_BASE64 secrets to set it automatically. Paste this into App Store Connect → TestFlight → the build → Test Details:" ;;
+                *) echo "Not set (see the Set What to Test step). Paste this into App Store Connect → TestFlight → the build → Test Details:" ;;
+              esac
+              echo
+              echo '```'
+              cat build/whats-new.txt
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove API key
+        if: always()
+        run: rm -f "$RUNNER_TEMP"/AuthKey_*.p8
+
+      - name: Keep logs
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: testflight-logs
+          path: apps/ios/build/logs
+          retention-days: 14
+
+      - name: Clean up runner
+        if: always()
+        run: if [[ -x scripts/ci-cleanup.sh ]]; then scripts/ci-cleanup.sh; fi

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Enforces the branching policy (CLAUDE.md) locally:
+#   - no pushing to main; changes reach main through PRs
+#   - branch names must be <type>/<slug>
+# Tags (build/*, v*) are allowed. Enable with: git config core.hooksPath .githooks
+source "$(git rev-parse --show-toplevel)/scripts/_common.sh"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$remote_ref" in
+    refs/heads/main)
+      die "Pushing to main is not allowed by the branching policy. Push a feature/, fix/ or chore/ branch and open a PR." ;;
+    refs/heads/*)
+      branch="${remote_ref#refs/heads/}"
+      [[ "$branch" =~ $BRANCH_PATTERN ]] || die "Branch '$branch' doesn't follow the policy: use feature/, fix/, chore/, docs/, ci/, refactor/ or test/ plus a lowercase slug." ;;
+  esac
+done
+exit 0

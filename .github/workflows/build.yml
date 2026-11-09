@@ -1,0 +1,115 @@
+name: Build
+
+# Builds the iOS app (apps/ios), once its Xcode project exists, on the self-hosted Mac. Each kind of event builds only
+# what it needs:
+#   pull request     run the unit tests (only when the iOS app, the shared scripts or this
+#                    workflow change; Android, web, docs and Claude config don't trigger it)
+#   v* tag           build the unsigned IPA and attach it to the GitHub release
+#   run by hand      both
+# Pushes to main aren't built here: the TestFlight workflow tests and archives main when
+# app code changes, so building it here too would repeat that work.
+on:
+  pull_request:
+    paths:
+      - "apps/ios/**"
+      - "scripts/**"
+      - ".github/workflows/build.yml"
+      - "!apps/ios/docs/**"
+      - "!**/*.md"
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: iOS build and test
+    if: github.event_name != 'push'
+    runs-on: [self-hosted, macOS]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check for the Xcode project
+        id: project
+        run: |
+          if [[ -d apps/ios/__APP_TARGET__.xcodeproj ]]; then echo "exists=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::apps/ios/__APP_TARGET__.xcodeproj doesn't exist yet, so there is nothing to test."; fi
+      - name: Run unit tests
+        if: steps.project.outputs.exists == 'true'
+        # Selects Xcode (xcode-select, else the newest in /Applications) and a simulator.
+        run: apps/ios/scripts/test.sh
+      - name: Upload test log
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-log
+          path: apps/ios/build/logs/test.log
+          if-no-files-found: ignore
+
+      - name: Clean up runner
+        if: always()
+        run: if [[ -x scripts/ci-cleanup.sh ]]; then scripts/ci-cleanup.sh; fi
+
+  ipa:
+    name: iOS unsigned IPA
+    if: github.event_name != 'pull_request'
+    runs-on: [self-hosted, macOS]
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Select Xcode
+        run: |
+          source apps/ios/scripts/_common.sh
+          ensure_xcode
+          echo "DEVELOPER_DIR=${DEVELOPER_DIR:-$(xcode-select -p)}" >> "$GITHUB_ENV"
+          xcodebuild -version
+
+      - name: Build for iOS devices without signing
+        run: |
+          xcodebuild \
+            -project apps/ios/__APP_TARGET__.xcodeproj \
+            -scheme __APP_TARGET__ \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath apps/ios/build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package IPA
+        id: package
+        run: |
+          VERSION="${GITHUB_REF_NAME//\//-}-${GITHUB_SHA::7}"
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then VERSION="$GITHUB_REF_NAME"; fi
+          NAME="__APP_TARGET__-${VERSION}-unsigned.ipa"
+          mkdir -p dist/Payload
+          cp -R apps/ios/build/Build/Products/Release-iphoneos/__APP_TARGET__.app dist/Payload/
+          (cd dist && zip -qry "$NAME" Payload)
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          ls -lh "dist/$NAME"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ steps.package.outputs.name }}
+          path: dist/${{ steps.package.outputs.name }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Attach IPA to GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v3
+        with:
+          files: dist/${{ steps.package.outputs.name }}
+          prerelease: true
+          generate_release_notes: true
+
+      - name: Clean up runner
+        if: always()
+        run: if [[ -x scripts/ci-cleanup.sh ]]; then scripts/ci-cleanup.sh; fi

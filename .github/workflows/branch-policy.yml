@@ -1,0 +1,64 @@
+name: Branch policy
+
+# Enforces the branching policy in CLAUDE.md on every PR:
+#   - PRs target main, from a branch named <type>/<slug>
+#     (feature, fix, chore, docs, ci, refactor, test, or claude for Claude's own branches)
+#   - Stacked PRs (gh stack) may instead target the policy-named branch below them;
+#     GitHub lands the whole stack on main, one merge commit per PR.
+# and shows the version the merge will produce. Make this check required if the repo
+# moves to a plan with branch protection.
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+concurrency:
+  group: branch-policy-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Branch name and version
+    runs-on: [self-hosted, macOS]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Check branch name and base
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          STACKED: ${{ github.event.pull_request.stack != null }}
+        run: |
+          source scripts/_common.sh
+          if [[ "$BASE_REF" != main ]]; then
+            # A stacked PR targets the branch below it in the stack.
+            if [[ ! "$BASE_REF" =~ $BRANCH_PATTERN ]]; then
+              echo "::error::PRs must target main, or the policy-named branch below them in a stack, not $BASE_REF."
+              exit 1
+            fi
+            if [[ "$STACKED" != true ]]; then
+              echo "::warning::This PR targets $BASE_REF but isn't linked into a stack yet. Run 'gh stack submit' or 'gh stack link' so it lands on main with the rest of the stack."
+            fi
+          fi
+          if [[ ! "$HEAD_REF" =~ $BRANCH_PATTERN ]]; then
+            echo "::error::Branch '$HEAD_REF' doesn't follow the policy. Use feature/, fix/, chore/, docs/, ci/, refactor/ or test/ followed by a lowercase slug, e.g. feature/pause-button."
+            exit 1
+          fi
+
+      - name: Version after merge
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          # Check out the branch by name so version.sh sees it as the current branch.
+          git checkout -q -B "$HEAD_REF"
+          {
+            echo "### Version if merged"
+            echo '```'
+            scripts/version.sh explain
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          scripts/version.sh explain
