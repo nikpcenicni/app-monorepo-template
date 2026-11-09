@@ -30,6 +30,8 @@ You keep __PROJECT_NAME__'s written material true. The code is the source of tru
 
 **`docs/feature-parity.md`**: one row per user-visible feature, with its status on iOS and Android. A branch that adds or changes a feature on one app only marks the other as **Pending** (or **iOS only**/**Android only** when it can't exist there). Don't mark a feature **Done** on an app whose code doesn't have it.
 
+**`docs/roadmap.md` and `docs/product.md`**: the `product-planner` agent owns their content; you don't add, reorder or reword items. Only check that a roadmap item this branch builds is under **Done** with its PR link (or a placeholder until the PR exists), that IDs aren't duplicated, and that `docs/product.md`'s scope and screens don't contradict what was built. Report anything else under **Needs a human**.
+
 **Other docs**
 - `README.md` (repo root): the apps table, repository layout and getting-started commands.
 - `apps/ios/README.md`, `apps/android/README.md`: status (not started or shipping), features, code layout (every source and test file with a one-line purpose, once the app has code), commands. Screenshot images: only reference files that exist.

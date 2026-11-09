@@ -1,12 +1,23 @@
 ---
 name: ship
-description: Takes a feature or fix request for __PROJECT_NAME__ from description to a merged PR, following the branching policy. Works out which apps it touches (iOS and Android together by default, or the website), writes one shared spec, builds each app in parallel with its own specialist sub-agents in separate worktrees, tests and reviews each app, checks iOS and Android still match, opens one PR, and (with --merge) merges it so the TestFlight workflow uploads it. Use when the user says "/ship <feature>", "build X and send it to TestFlight", or "ship it".
-argument-hint: "<what to build or fix> [--ios-only | --android-only | --web] [--merge]"
+description: Takes a feature or fix request for __PROJECT_NAME__ from description to a merged PR, following the branching policy. Works out which apps it touches (iOS and Android together by default, or the website), writes one shared spec, builds each app in parallel with its own specialist sub-agents in separate worktrees, tests and reviews each app, checks iOS and Android still match, opens one PR, and (with --merge) merges it so the TestFlight workflow uploads it. Also builds items from docs/roadmap.md by ID ("/ship R-003") or the next one in priority order ("/ship next"). Use when the user says "/ship <feature>", "/ship R-003", "/ship next", "build the next roadmap item", "build X and send it to TestFlight", or "ship it".
+argument-hint: "<what to build or fix | R-NNN | next> [--ios-only | --android-only | --web] [--merge]"
 ---
 
 # Ship a change
 
 The request: **$ARGUMENTS**
+
+## 0. Roadmap items
+If the request is a roadmap ID (`R-003`) or `next`, read `docs/roadmap.md` (its format is described at the top) and turn it into a request:
+- **`next`:** take the first item under **Up next** that has no open PR (`gh pr list --state open --search "R-NNN in:body"`) and whose **Depends on** items are all under **Done** or have an open PR. If none qualifies, stop and say why (empty, or everything blocked), and suggest running `product-planner` to plan more.
+- **An ID:** find that item. If it's under **Done**, **Dropped** or **Ideas**, or already has an open PR, stop and say so.
+- **The item is the request:** its title, **Why**, **What** and **Notes** describe the change; its **Acceptance** cases go into the shared spec in step 3 as test cases; **Apps** sets the scope in step 1 (flags on the command line still win); **Type** sets the branch type in step 2.
+- **Dependencies:** if a **Depends on** item has an open PR that hasn't merged, stack this branch on that PR's branch (step 2).
+- **Unclear items:** if an open question in the item changes what gets built, stop and ask, or suggest running `product-planner` on it. Otherwise pick a sensible default and note it in the PR.
+- On the branch, before opening the PR (step 7): move the item to **Done**, set its **PR:** field to the PR link once it exists (in a follow-up commit on the branch; never amend a pushed commit), and put `Roadmap: R-NNN` in the PR description. If the build narrowed the item (part of it left for later), add the remainder as a new item under **Up next** with the next free ID, depending on this one.
+
+A free-text request that matches a roadmap item closely is treated the same way: say which item it matches.
 
 Work through these steps in order. The user may be on their phone, so don't stop to ask questions you can answer with a sensible default. Note your assumptions in the PR. Stop and ask only if the request is ambiguous in a way that changes what gets built, or if a step needs the user (Apple ID or Play Console setup, secrets, approving a new dependency).
 
@@ -96,6 +107,7 @@ Then run **`docs-keeper`**, always, on its own once the code is final. It update
 - If this branch is part of a stack, update it with `gh stack sync --accept-base-change` (never merge `main` into it). Then run `gh stack submit --auto --open` to push every layer and open or link the PRs. Edit this layer's PR with `gh pr edit` so its description has the details below.
 - Otherwise run `git push -u origin HEAD`, then `gh pr create --base main` with:
   - a `## What to Test` section (below);
+  - `Roadmap: R-NNN` if it builds a roadmap item;
   - the apps it changes, and what changed in each;
   - the shared spec (short), and any accepted platform differences;
   - how each app was tested (the test result lines);
@@ -121,7 +133,7 @@ Uploads only come from `main` (branching policy), so never run `apps/ios/scripts
 
 ## 9. Report
 Keep it short, since it may be read on a phone:
-- One line on what was built, and on which apps.
+- One line on what was built, and on which apps (and the roadmap ID, if any).
 - PR link.
 - The version it ships as, e.g. "1.0 (8)", and whether the TestFlight run started or is waiting on the merge.
 - The PR's What to Test bullets.
@@ -133,6 +145,6 @@ A request to start an app ("Start the iOS app", "Port __PROJECT_NAME__ to Androi
 1. **iOS:** the Xcode project has to be created in Xcode by the user with the names in `apps/ios/CLAUDE.md` (a hand-written `project.pbxproj` is fragile). Ask for it, then open `chore/ios-project` with the empty project, a placeholder screen and one passing test, and check `apps/ios/scripts/test.sh` and the Build workflow pass.
    **Android:** `chore/android-project`: the Gradle scaffold from `apps/android/CLAUDE.md` (modules, wrapper, version catalog, `scripts/test.sh` and `scripts/build.sh`, the CI workflow), with an empty `core` and a placeholder screen. Its PR lists the baseline dependencies for the user to approve; don't merge it without that approval, even with `--merge`.
 2. `feature/<app>-core`: the core logic (ported from the other app if it exists) with its tests (the app's engineer, then its test engineer, then `parity-reviewer` on the whole of `core` if the other app exists).
-3. `feature/<app>-<screen>` and further layers, following the **Pending** rows in `docs/feature-parity.md`.
+3. `feature/<app>-<screen>` and further layers, following the **Pending** rows in `docs/feature-parity.md` and the order of `docs/roadmap.md`.
 
 Each layer goes through steps 3–7 for that app only, and marks its rows **Done** in `docs/feature-parity.md`.

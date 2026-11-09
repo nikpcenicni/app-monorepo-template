@@ -1,6 +1,6 @@
 # Using this template
 
-A monorepo starter for an app shipped on iOS, Android and a static website, with the Claude Code setup that builds features on both apps at once: 17 specialist agents, the `/ship` and `/testflight` skills, a branching policy that works out versions from git, and CI for branch checks, iOS tests, TestFlight uploads and `@claude` on issues.
+A monorepo starter for an app shipped on iOS, Android and a static website, with the Claude Code setup that builds features on both apps at once: 18 specialist agents, the `/ship` and `/testflight` skills, a branching policy that works out versions from git, and CI for branch checks, iOS tests, TestFlight uploads and `@claude` on issues.
 
 It was taken from a shipping project and made generic. Nothing app-specific is left: the iOS and Android folders hold only rules, scripts and store-listing skeletons, ready for the first project to be created.
 
@@ -44,13 +44,13 @@ Comments like `<!-- … -->` and **Open question:** markers in docs are for you 
 | Path | What |
 | --- | --- |
 | `CLAUDE.md`, `apps/*/CLAUDE.md` | Repo-wide branching policy, versioning, workflow and agent tiers; per-app code rules |
-| `.claude/agents/` | `swift-engineer`, `kotlin-engineer`, `web-engineer`, `test-engineer`, `android-test-engineer`, `swiftui-design-reviewer`, `compose-design-reviewer`, `accessibility-auditor`, `parity-reviewer`, `app-store-compliance`, `play-store-compliance`, `build-doctor`, `android-build-doctor`, `docs-keeper`, `release-manager`, and for games `gamekit-specialist` and `play-games-specialist` |
+| `.claude/agents/` | `product-planner`, `swift-engineer`, `kotlin-engineer`, `web-engineer`, `test-engineer`, `android-test-engineer`, `swiftui-design-reviewer`, `compose-design-reviewer`, `accessibility-auditor`, `parity-reviewer`, `app-store-compliance`, `play-store-compliance`, `build-doctor`, `android-build-doctor`, `docs-keeper`, `release-manager`, and for games `gamekit-specialist` and `play-games-specialist` |
 | `.claude/skills/` | `/ship` (spec → parallel iOS and Android builds in worktrees → tests → reviews → docs → PR → merge) and `/testflight` |
 | `scripts/` | `version.sh` (version from git), `what-to-test.sh` (TestFlight notes from PRs), `ci-cleanup.sh`, `_common.sh` |
 | `apps/ios/scripts/` | `test.sh`, `testflight.sh`, `set-testflight-notes.swift`, `_common.sh` |
 | `.github/workflows/` | Branch policy check, iOS build and tests, TestFlight on merge, Claude on `@claude` |
 | `.githooks/pre-push` | Blocks pushes to `main` and badly named branches |
-| `docs/` | Development workflow and setup, feature parity table |
+| `docs/` | Development workflow and setup, product brief, roadmap, feature parity table |
 | `apps/*/docs/` | App Store and Play Store listing skeletons |
 | `apps/web/` | A static landing page with "Coming soon" store buttons |
 

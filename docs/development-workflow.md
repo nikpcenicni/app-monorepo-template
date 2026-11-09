@@ -12,6 +12,16 @@ How to go from an idea to a TestFlight build with Claude, from a computer or a p
 
 Upload `main` again without new code: `/testflight`, or **Actions → TestFlight → Run workflow** in the GitHub app.
 
+## Planning and the roadmap
+
+Decide what to build before building it:
+
+1. **Discuss it.** Ask Claude to "use the product-planner to plan the app" (or "…to work out how X should work"). It asks a few questions at a time, each with options and a recommendation, and you answer in one line ("1a, 2 as recommended"). For a longer back-and-forth, run it as the session's main agent: `claude --agent product-planner`.
+2. **Record it.** Once you agree, it writes the decisions to [product.md](product.md) (pitch, audience, scope for 1.0, screens, decision log) and adds items to [roadmap.md](roadmap.md), each sized to one PR with acceptance cases.
+3. **Build it.** `/ship R-003` builds one item; `/ship next` builds the highest-priority item that isn't blocked or already in a PR. The item's acceptance cases become test cases in the shared spec, and the item moves to **Done** in the same PR. From a phone: `@claude /ship next` on an issue.
+
+Commit the planner's edits on a `docs/` branch and open a PR like any other change (`- Nothing new to test.`).
+
 ## Pipeline
 
 `/ship` builds a user-visible feature or fix on **iOS and Android together** by default, in one branch and one PR (`--ios-only`, `--android-only` or `--web` narrow it). Until an app has code, it builds the other one only and marks the feature **Pending** for it in [feature-parity.md](feature-parity.md).
@@ -40,6 +50,7 @@ Website changes (`--web`) go through `web-engineer`, `accessibility-auditor` and
 
 | Agent | Role | Edits code |
 | --- | --- | --- |
+| `product-planner` | Discusses design options and recommends; keeps the product brief and roadmap that `/ship` builds from | Yes (`docs/product.md`, `docs/roadmap.md` only) |
 | `swift-engineer` | Implements iOS features and fixes in Swift and SwiftUI | Yes |
 | `kotlin-engineer` | Implements Android features and fixes in Kotlin and Jetpack Compose, and ports logic from iOS | Yes |
 | `web-engineer` | The static home page in `apps/web/` | Yes |

@@ -59,6 +59,7 @@ Run scripts from anywhere; they find their own folders. The iOS scripts find Xco
 ## Workflow
 
 - `/ship <feature>` takes a request from branch through implementation, review and PR, and can merge it so CI uploads to TestFlight. By default a user-visible feature or fix is built on **both iOS and Android** in one PR: one shared spec, each app's specialist agents running in parallel in their own worktrees, and `parity-reviewer` checking the apps still match. `--ios-only`, `--android-only` and `--web` narrow it. `/testflight` uploads `main` by hand.
+- **Plan before building.** The `product-planner` agent discusses design options with the user and records what's agreed in [docs/product.md](docs/product.md) (product brief and decision log) and [docs/roadmap.md](docs/roadmap.md) (prioritised items, each one PR). `/ship R-003` builds a roadmap item and `/ship next` builds the next unblocked one; `/ship` moves the item to **Done** on its own branch. Apart from that (and adding an item for any part it left for later), only `product-planner` adds, reorders or rewords roadmap items.
 - [docs/feature-parity.md](docs/feature-parity.md) lists every user-visible feature and its status on iOS and Android. Keep it current: a feature built on one app only is **Pending** on the other.
 - Specialist agents are in `.claude/agents/`:
   | Area | iOS | Android | Website |
@@ -70,11 +71,11 @@ Run scripts from anywhere; they find their own folders. The iOS scripts find Xco
   | Store compliance | `app-store-compliance` | `play-store-compliance` | |
   | Build and signing | `build-doctor` | `android-build-doctor` | |
 
-  Shared by all apps: `accessibility-auditor` (iOS, Android and web), `parity-reviewer` (iOS against Android), `docs-keeper`, `release-manager`.
+  Shared by all apps: `product-planner` (product design and the roadmap), `accessibility-auditor` (iOS, Android and web), `parity-reviewer` (iOS against Android), `docs-keeper`, `release-manager`.
 - Each agent's `model` is set by how much the work needs judgment. Keep to these tiers when adding or editing agents, and only change them on purpose:
   | Model | Agents | Why |
   | --- | --- | --- |
-  | `opus` | `test-engineer`, `android-test-engineer`, `swiftui-design-reviewer`, `compose-design-reviewer`, `accessibility-auditor`, `parity-reviewer`, `app-store-compliance`, `play-store-compliance`, and the `Plan` step in `/ship` | Planning, test design and reviews, where a missed issue costs most |
+  | `opus` | `product-planner`, `test-engineer`, `android-test-engineer`, `swiftui-design-reviewer`, `compose-design-reviewer`, `accessibility-auditor`, `parity-reviewer`, `app-store-compliance`, `play-store-compliance`, and the `Plan` step in `/ship` | Product planning, test design and reviews, where a missed issue costs most |
   | `sonnet` | `swift-engineer`, `kotlin-engineer`, `web-engineer`, `gamekit-specialist`, `play-games-specialist`, `build-doctor`, `android-build-doctor` | Implementing from a plan and fixing builds |
   | `haiku` | `docs-keeper`, `release-manager` | Mechanical work: syncing docs, running release scripts, writing notes |
 - **Every PR description has a `## What to Test` section**: 2–5 plain-text bullets for testers, or `- Nothing new to test.` The TestFlight workflow copies the sections of the PRs in each build into its TestFlight What to Test text (`scripts/what-to-test.sh`, set by `apps/ios/scripts/set-testflight-notes.swift` when the App Store Connect API key secrets exist). This applies in GitHub Actions too.

@@ -21,7 +21,7 @@ apps/
     docs/                  Play Store listing
   web/                     Website: static landing page (index.html, styles.css, assets/)
 scripts/                   Shared by every app: version.sh, what-to-test.sh, ci-cleanup.sh, _common.sh
-docs/                      Shared docs: development-workflow.md, feature-parity.md (what each app has)
+docs/                      Shared docs: development-workflow.md, product.md (brief and decisions), roadmap.md (what to build next), feature-parity.md (what each app has)
 .github/workflows/         CI: branch policy, iOS build and tests, TestFlight, Claude
 .githooks/                 pre-push hook that enforces the branching policy
 .claude/                   Claude Code agents (per platform and shared) and skills (/ship, /testflight)
