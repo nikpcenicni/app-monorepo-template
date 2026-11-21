@@ -40,11 +40,11 @@ Decide which apps the change touches, and say so in one line before starting:
 
 ## 2. Prepare
 - `git status`: if the tree is dirty with unrelated changes, stop and report them. Don't stash or discard someone's work.
-- Pick the branch type from the branching policy in `CLAUDE.md`: `feature/` for new user-visible behavior, `fix/` for bugs, `chore/`/`docs/`/`ci/`/`refactor/`/`test/` otherwise. If the request mixes kinds, do the main one and list the rest as follow-ups. One branch covers every app the change touches: iOS and Android share a version, so a feature on both is still one `feature/` branch and one PR.
+- Pick the branch type from the branching policy in `AGENTS.md`: `feature/` for new user-visible behavior, `fix/` for bugs, `chore/`/`docs/`/`ci/`/`refactor/`/`test/` otherwise. If the request mixes kinds, do the main one and list the rest as follow-ups. One branch covers every app the change touches: iOS and Android share a version, so a feature on both is still one `feature/` branch and one PR.
 - If other agents may be working in this repo at the same time, work in your own git worktree (`EnterWorktree`) so you don't share a checkout.
 - If the change depends on a branch that hasn't merged yet, stack it on that branch instead of starting from `main`: `gh stack checkout <that branch or PR>` (or `gh stack init <that branch>` if it isn't in a stack yet), then `gh stack add <type>/<short-kebab-slug>` from the top of the stack.
 - Otherwise: `git checkout main && git pull --ff-only`, then `git checkout -b <type>/<short-kebab-slug>`. Inside GitHub Actions, the action starts you on a `feature/…` branch. If the work is a fix or chore, create a correctly named branch from it and push that instead.
-- Read `CLAUDE.md`, the `CLAUDE.md` of each app in scope (`apps/ios/CLAUDE.md`, `apps/android/CLAUDE.md`, `apps/web/CLAUDE.md`), and only the code the change touches, on each side.
+- Read `AGENTS.md`, the `AGENTS.md` of each app in scope (`apps/ios/AGENTS.md`, `apps/android/AGENTS.md`, `apps/web/AGENTS.md`), and only the code the change touches, on each side.
 
 ## 3. Spec and plan
 Unless the change is small and obvious (one or two files per app, no new rules or screens), run the `Plan` agent with `model: "opus"`. Give it the request, the files you found on each side and the code rules of each app in scope. Ask it for:
@@ -142,8 +142,8 @@ Keep it short, since it may be read on a phone:
 
 ## Starting an app
 A request to start an app ("Start the iOS app", "Port __PROJECT_NAME__ to Android") is too big for one PR. Build it as a stack, one layer per PR, each a policy-named branch on the one below, in this order:
-1. **iOS:** the Xcode project has to be created in Xcode by the user with the names in `apps/ios/CLAUDE.md` (a hand-written `project.pbxproj` is fragile). Ask for it, then open `chore/ios-project` with the empty project, a placeholder screen and one passing test, and check `apps/ios/scripts/test.sh` and the Build workflow pass.
-   **Android:** `chore/android-project`: the Gradle scaffold from `apps/android/CLAUDE.md` (modules, wrapper, version catalog, `scripts/test.sh` and `scripts/build.sh`, the CI workflow), with an empty `core` and a placeholder screen. Its PR lists the baseline dependencies for the user to approve; don't merge it without that approval, even with `--merge`.
+1. **iOS:** the Xcode project has to be created in Xcode by the user with the names in `apps/ios/AGENTS.md` (a hand-written `project.pbxproj` is fragile). Ask for it, then open `chore/ios-project` with the empty project, a placeholder screen and one passing test, and check `apps/ios/scripts/test.sh` and the Build workflow pass.
+   **Android:** `chore/android-project`: the Gradle scaffold from `apps/android/AGENTS.md` (modules, wrapper, version catalog, `scripts/test.sh` and `scripts/build.sh`, the CI workflow), with an empty `core` and a placeholder screen. Its PR lists the baseline dependencies for the user to approve; don't merge it without that approval, even with `--merge`.
 2. `feature/<app>-core`: the core logic (ported from the other app if it exists) with its tests (the app's engineer, then its test engineer, then `parity-reviewer` on the whole of `core` if the other app exists).
 3. `feature/<app>-<screen>` and further layers, following the **Pending** rows in `docs/feature-parity.md` and the order of `docs/roadmap.md`.
 

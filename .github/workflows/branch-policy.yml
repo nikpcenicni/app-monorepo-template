@@ -1,6 +1,6 @@
 name: Branch policy
 
-# Enforces the branching policy in CLAUDE.md on every PR:
+# Enforces the branching policy in AGENTS.md on every PR:
 #   - PRs target main, from a branch named <type>/<slug>
 #     (feature, fix, chore, docs, ci, refactor, test, or claude for Claude's own branches)
 #   - Stacked PRs (gh stack) may instead target the policy-named branch below them;

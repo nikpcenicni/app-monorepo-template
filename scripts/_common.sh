@@ -8,7 +8,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # higher build number than the commit count gives (for example after a history rewrite).
 BUILD_OFFSET=0
 
-# Branch names allowed by the branching policy (see CLAUDE.md).
+# Branch names allowed by the branching policy (see AGENTS.md).
 BRANCH_PATTERN='^(feature|fix|chore|docs|ci|refactor|test|claude)/[a-z0-9][a-z0-9._-]*$'
 
 log() { printf '\033[1;34m==>\033[0m %s\n' "$*" >&2; }

@@ -42,7 +42,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # Branches Claude creates follow the branching policy. For a fix or chore,
-          # Claude pushes to a fix/ or chore/ branch instead (see CLAUDE.md).
+          # Claude pushes to a fix/ or chore/ branch instead (see AGENTS.md).
           branch_prefix: "feature/"
           additional_permissions: |
             actions: read

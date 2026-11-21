@@ -1,6 +1,6 @@
 # __PROJECT_NAME__ website
 
-The home page for both apps: what __PROJECT_NAME__ is, download links for the App Store and Google Play, and a footer crediting [__OWNER_NAME__](__OWNER_URL__). Code rules are in [CLAUDE.md](CLAUDE.md).
+The home page for both apps: what __PROJECT_NAME__ is, download links for the App Store and Google Play, and a footer crediting [__OWNER_NAME__](__OWNER_URL__). Code rules are in [AGENTS.md](AGENTS.md).
 
 It's a static page with no build step:
 
@@ -26,4 +26,4 @@ Neither store listing is live yet, so both buttons show "Coming soon". When an a
 
 ## Versioning
 
-The site has its own version, separate from the apps' (see the root [CLAUDE.md](../../CLAUDE.md#branching-policy-always-follow)). It's in `package.json`; change it only when the site changes meaningfully. `scripts/version.sh` and the `v*` tags are for the apps, and changes that only touch `apps/web/` don't move them. Web changes still go through policy-named branches and PRs.
+The site has its own version, separate from the apps' (see the root [AGENTS.md](../../AGENTS.md#branching-policy-always-follow)). It's in `package.json`; change it only when the site changes meaningfully. `scripts/version.sh` and the `v*` tags are for the apps, and changes that only touch `apps/web/` don't move them. Web changes still go through policy-named branches and PRs.

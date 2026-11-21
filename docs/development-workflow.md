@@ -64,7 +64,7 @@ Website changes (`--web`) go through `web-engineer`, `accessibility-auditor` and
 | `parity-reviewer` | Checks iOS and Android still behave the same: rules, numbers, strings, settings, tests | No |
 | `app-store-compliance` | App Store Review Guidelines, privacy manifest, export compliance, metadata | No |
 | `play-store-compliance` | Google Play policies, target API level, permissions, Data safety, listing limits | No |
-| `docs-keeper` | Keeps the store listings, feature parity, READMEs, docs, CLAUDE.md and agent files in step with the code. Runs on every branch before its PR | Yes (docs only) |
+| `docs-keeper` | Keeps the store listings, feature parity, READMEs, docs, AGENTS.md and agent files in step with the code. Runs on every branch before its PR | Yes (docs only) |
 | `build-doctor` | xcodebuild, signing, provisioning and upload errors | Yes (config) |
 | `android-build-doctor` | Gradle, Android SDK, JDK, lint, signing and Play upload errors | Yes (config) |
 | `release-manager` | TestFlight (and later Play) uploads from main, release tags, What to Test notes | No (runs scripts) |
@@ -73,7 +73,7 @@ You can also call any agent directly, for example: "use the accessibility-audito
 
 ## Branching and versioning
 
-The full policy is in [CLAUDE.md](../CLAUDE.md#branching-policy-always-follow). In short:
+The full policy is in [AGENTS.md](../AGENTS.md#branching-policy-always-follow). In short:
 
 - Work happens on `feature/…`, `fix/…`, `chore/…`, `docs/…`, `ci/…`, `refactor/…` or `test/…` branches, and reaches `main` only through a PR merged with a merge commit.
 - Work that depends on an unmerged branch is stacked with GitHub's stacked PRs (`gh stack`): each layer is its own policy-named branch and PR, the bottom one targets `main` and each one above targets the branch below. Keep a stack up to date with `gh stack sync` (never merge `main` into it) and land it one layer at a time from the bottom (`gh stack merge <bottom-pr> --merge`), so each PR gets its own merge commit. Merging several layers in one call produces a single merge commit named after the top branch, and `scripts/version.sh` then can't see the lower branches' types.
@@ -87,7 +87,7 @@ The full policy is in [CLAUDE.md](../CLAUDE.md#branching-policy-always-follow). 
 Enforcement, since GitHub Free doesn't offer branch protection on private repos:
 - **Local:** the `.githooks/pre-push` hook blocks pushes to `main` and badly named branches. Enable it once per clone with `git config core.hooksPath .githooks`.
 - **On GitHub:** the **Branch policy** check fails PRs from badly named branches, or that target anything but `main` or a policy-named branch below them in a stack (it warns if such a PR isn't linked into a stack yet). The repo only allows merge commits and deletes branches after merging.
-- **Scripts and Claude:** `apps/ios/scripts/testflight.sh` only uploads a clean `main` that matches `origin/main`. Every Claude session loads the policy from CLAUDE.md.
+- **Scripts and Claude:** `apps/ios/scripts/testflight.sh` only uploads a clean `main` that matches `origin/main`. Every Claude session loads the policy from AGENTS.md (through the CLAUDE.md symlink).
 
 ## One-time setup
 

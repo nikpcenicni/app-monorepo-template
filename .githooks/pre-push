@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Enforces the branching policy (CLAUDE.md) locally:
+# Enforces the branching policy (AGENTS.md) locally:
 #   - no pushing to main; changes reach main through PRs
 #   - branch names must be <type>/<slug>
 # Tags (build/*, v*) are allowed. Enable with: git config core.hooksPath .githooks
