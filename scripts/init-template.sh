@@ -114,7 +114,7 @@ perl -pi -e '
 
 if [[ "$GAME_SERVICES" == no ]]; then
   log "Removing the game-services agents (gamekit-specialist, play-games-specialist)"
-  rm -f .claude/agents/gamekit-specialist.md .claude/agents/play-games-specialist.md
+  rm -f .agents/agents/gamekit-specialist.md .agents/agents/play-games-specialist.md
   perl -0pi -e '
     s/^  \| Game services \(games only; delete if unused\) \|[^\n]*\n//m;
     s/`gamekit-specialist`, `play-games-specialist`, //g;
@@ -126,12 +126,12 @@ if [[ "$GAME_SERVICES" == no ]]; then
     s/^\| `play-games-specialist` \|[^\n]*\n//m;
     s/, `gamekit-specialist` handles Game Center \(games only\)//g;
     s/, `play-games-specialist` handles Play Games Services \(games only\)//g;
-  ' CLAUDE.md .claude/skills/ship/SKILL.md docs/development-workflow.md apps/ios/README.md apps/android/README.md
+  ' AGENTS.md .agents/skills/ship/SKILL.md docs/development-workflow.md apps/ios/README.md apps/android/README.md
   if left="$(grep -rln -e 'gamekit-specialist' -e 'play-games-specialist' --exclude-dir=.git --exclude=init-template.sh --exclude=TEMPLATE.md . )"; then
     echo "Still mentioned (edit by hand): $left" >&2
   fi
 else
-  perl -pi -e 's/ \(games only; delete if unused\)//' CLAUDE.md
+  perl -pi -e 's/ \(games only; delete if unused\)//' AGENTS.md
 fi
 
 chmod +x scripts/*.sh apps/ios/scripts/*.sh .githooks/pre-push

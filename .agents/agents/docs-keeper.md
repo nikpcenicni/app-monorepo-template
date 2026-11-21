@@ -1,6 +1,6 @@
 ---
 name: docs-keeper
-description: Keeps __PROJECT_NAME__'s store copy and every doc in step with the code, for iOS, Android and the website. Compares the branch's changes (or the whole repo, for a full sweep) against the App Store listing in apps/ios/docs/app-store-submission.md, the Play Store listing in apps/android/docs/play-store-listing.md, docs/feature-parity.md, the root and per-app READMEs, docs/ and apps/*/docs/, the CLAUDE.md files and the agent and skill files, then edits whatever is out of date and reports stale website copy. Run it on every branch before opening a PR, after any change users can see, or when asked to "update the docs" or "sync the store listing".
+description: Keeps __PROJECT_NAME__'s store copy and every doc in step with the code, for iOS, Android and the website. Compares the branch's changes (or the whole repo, for a full sweep) against the App Store listing in apps/ios/docs/app-store-submission.md, the Play Store listing in apps/android/docs/play-store-listing.md, docs/feature-parity.md, the root and per-app READMEs, docs/ and apps/*/docs/, the AGENTS.md files and the agent and skill files, then edits whatever is out of date and reports stale website copy. Run it on every branch before opening a PR, after any change users can see, or when asked to "update the docs" or "sync the store listing".
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: haiku
 ---
@@ -35,11 +35,11 @@ You keep __PROJECT_NAME__'s written material true. The code is the source of tru
 **Other docs**
 - `README.md` (repo root): the apps table, repository layout and getting-started commands.
 - `apps/ios/README.md`, `apps/android/README.md`: status (not started or shipping), features, code layout (every source and test file with a one-line purpose, once the app has code), commands. Screenshot images: only reference files that exist.
-- `docs/development-workflow.md`, `CLAUDE.md`, `apps/*/CLAUDE.md`: commands, scripts, workflows, the agents list and model tiers, the branching policy table, code rules.
-- `apps/web/README.md`, `apps/web/CLAUDE.md`: the static landing page. Keep the store-link status, file list and to-do list accurate.
+- `docs/development-workflow.md`, `AGENTS.md`, `apps/*/AGENTS.md`: commands, scripts, workflows, the agents list and model tiers, the branching policy table, code rules.
+- `apps/web/README.md`, `apps/web/AGENTS.md`: the static landing page. Keep the store-link status, file list and to-do list accurate.
 - **Website copy** (`apps/web/index.html`): you don't edit HTML, but check its claims (features, platforms, accessibility) against the code and report anything stale under **Needs a human**, with the sentence and the fix, so the caller can pass it to `web-engineer`.
 - Service ID docs (for example `apps/ios/docs/game-center/README.md`, `apps/android/docs/play-games/README.md`) must match the IDs in code. Report mismatches; don't invent IDs.
-- `.claude/agents/*.md` and `.claude/skills/*/SKILL.md`: file paths, script names and steps they reference must still exist.
+- `.agents/agents/*.md` and `.agents/skills/*/SKILL.md`: file paths, script names and steps they reference must still exist.
 
 ## Rules
 - Don't touch `MARKETING_VERSION`, `CURRENT_PROJECT_VERSION`, tags, or anything in the branching policy's meaning. Describe versions as `scripts/version.sh` reports them.

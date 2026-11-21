@@ -3,7 +3,7 @@ name: TestFlight
 # Uploads a build of the iOS app (apps/ios) to TestFlight when its app code changes on main, or when started by hand
 # (Actions tab → TestFlight → Run workflow, also available in the GitHub mobile app).
 # The version is worked out from git by scripts/version.sh (see the branching policy in
-# CLAUDE.md), so nothing is committed back. Each upload is tagged build/<N>.
+# AGENTS.md), so nothing is committed back. Each upload is tagged build/<N>.
 #
 # Runs on the self-hosted Mac mini (label __PROJECT_SLUG__-release), which signs with the Apple
 # Distribution certificate in its login keychain and the Apple ID signed in to Xcode.

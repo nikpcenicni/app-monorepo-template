@@ -20,7 +20,7 @@ Work out which apps to audit: the platform the caller names, or each app folder 
 - **Both apps behave the same way for assistive tech:** the same announcements at the same moments and the same non-gesture paths. Note any difference.
 
 ## iOS (`apps/ios/`)
-Read `apps/ios/__APP_TARGET__/Views/` and `apps/ios/CLAUDE.md`.
+Read `apps/ios/__APP_TARGET__/Views/` and `apps/ios/AGENTS.md`.
 - Every `Button`, `Image` and custom control has a meaningful label. Decorative images use `.accessibilityHidden(true)`.
 - Related elements are grouped (`.accessibilityElement(children: .combine)`) so VoiceOver doesn't stop on every fragment.
 - Dynamic Type: text styles or `@ScaledMetric`; layouts survive AX1–AX5 with no clipping (`ViewThatFits`, `dynamicTypeSize`); sheets scroll.
@@ -30,7 +30,7 @@ Read `apps/ios/__APP_TARGET__/Views/` and `apps/ios/CLAUDE.md`.
 - Verify with `apps/ios/scripts/test.sh`.
 
 ## Android (`apps/android/`)
-Read `apps/android/app/src/main/` (composables, themes, `strings.xml`) and `apps/android/CLAUDE.md`.
+Read `apps/android/app/src/main/` (composables, themes, `strings.xml`) and `apps/android/AGENTS.md`.
 - Every clickable and image has a `contentDescription` or `semantics { }` label; decorative ones use `contentDescription = null` or `clearAndSetSemantics {}`. Labels come from `strings.xml`.
 - Related elements merge (`Modifier.semantics(mergeDescendants = true)`). Headings use `heading()`; toggles and selected states use `Role` and `stateDescription`/`selected`.
 - Font scale: text in `sp`, layouts survive 200% with no clipping, and dialogs and sheets scroll.
@@ -40,7 +40,7 @@ Read `apps/android/app/src/main/` (composables, themes, `strings.xml`) and `apps
 - Verify with `apps/android/scripts/test.sh` (it runs lint, which catches some of these).
 
 ## Website (`apps/web/`)
-Read `apps/web/index.html`, `apps/web/styles.css` and `apps/web/CLAUDE.md`. Check against WCAG 2.2 AA:
+Read `apps/web/index.html`, `apps/web/styles.css` and `apps/web/AGENTS.md`. Check against WCAG 2.2 AA:
 - Landmarks (`header`, `main`, `footer`), one `h1`, heading levels in order, a `lang` on `<html>`.
 - Images have `alt` text (empty for decorative ones). Link text makes sense alone; "Coming soon" store links aren't focusable as links and say why.
 - Text contrast at least 4.5:1 (3:1 for large text and focus indicators) in both colour schemes; compute it from the hex values.

@@ -6,7 +6,7 @@ This is the iOS app in the [__PROJECT_NAME__ monorepo](../../README.md). Paths i
 
 ## Starting the app
 
-Create the Xcode project with the names in [CLAUDE.md](CLAUDE.md#creating-the-xcode-project), so the scripts and CI find it, then run `/ship Start the iOS app` in Claude Code. Until the project exists, the Build workflow skips its tests and the TestFlight workflow has nothing to upload.
+Create the Xcode project with the names in [AGENTS.md](AGENTS.md#creating-the-xcode-project), so the scripts and CI find it, then run `/ship Start the iOS app` in Claude Code. Until the project exists, the Build workflow skips its tests and the TestFlight workflow has nothing to upload.
 
 ## Commands
 

@@ -2,12 +2,12 @@
 
 Placeholder. The Android version of __PROJECT_NAME__ will live in this folder. There is no code yet.
 
-The code rules, stack (Kotlin and Jetpack Compose) and module layout the app will use are in [CLAUDE.md](CLAUDE.md). In short:
+The code rules, stack (Kotlin and Jetpack Compose) and module layout the app will use are in [AGENTS.md](AGENTS.md). In short:
 
 - Keep everything Android in this folder: the Gradle project, its scripts (`apps/android/scripts/`), its docs (`apps/android/docs/`, including the Play Store listing) and its build output.
 - [docs/feature-parity.md](../../docs/feature-parity.md) lists which features each app has, and which app is the reference for rules not built here yet.
 - Add a CI workflow that only runs on changes under `apps/android/`, the way `.github/workflows/build.yml` does for iOS.
-- Android always has the same version as iOS (see the root [CLAUDE.md](../../CLAUDE.md#branching-policy-always-follow)). Take `versionName` from `scripts/version.sh marketing` and `versionCode` from `scripts/version.sh build` at build time, the way `apps/ios/scripts/testflight.sh` passes them to Xcode; don't write them into `build.gradle(.kts)` by hand. A release is one `vX.Y.Z` tag for both apps.
+- Android always has the same version as iOS (see the root [AGENTS.md](../../AGENTS.md#branching-policy-always-follow)). Take `versionName` from `scripts/version.sh marketing` and `versionCode` from `scripts/version.sh build` at build time, the way `apps/ios/scripts/testflight.sh` passes them to Xcode; don't write them into `build.gradle(.kts)` by hand. A release is one `vX.Y.Z` tag for both apps.
 
 ## Claude agents
 

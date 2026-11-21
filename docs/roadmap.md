@@ -30,7 +30,7 @@ Rules:
 - IDs are `R-` plus three digits, in the order items were added. Never reuse or renumber one.
 - An item moves between sections; it's never deleted. **Dropped** items keep a one-line reason.
 - An item that depends on one not merged yet is built as a stacked PR on that item's branch.
-- **Type** sets the branch: `feature/`, `fix/` or `chore/` (see the branching policy in [CLAUDE.md](../CLAUDE.md)).
+- **Type** sets the branch: `feature/`, `fix/` or `chore/` (see the branching policy in [AGENTS.md](../AGENTS.md)).
 
 ## Up next
 

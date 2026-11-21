@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Works out the app version from git, following the branching policy in CLAUDE.md.
+# Works out the app version from git, following the branching policy in AGENTS.md.
 # Nothing is stored: the same commit always gets the same version. The iOS and Android apps
 # always share this version. The website (apps/web/) has its own, so a merge or branch that
 # only changes apps/web/ is left out of the marketing version (see counts_for_app_version

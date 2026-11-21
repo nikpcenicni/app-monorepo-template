@@ -7,7 +7,7 @@
 #   --archive-only  archive and sign but don't upload. Works on any branch; use it to check signing.
 #   --tag           after uploading, create and push the tag build/<N> on the uploaded commit
 #
-# The version comes from scripts/version.sh at the repo root (worked out from git, see CLAUDE.md) and is
+# The version comes from scripts/version.sh at the repo root (worked out from git, see AGENTS.md) and is
 # passed to xcodebuild. project.pbxproj is never edited. Uploads are only allowed from a
 # clean main that matches origin/main, so every build number maps to one commit.
 #
